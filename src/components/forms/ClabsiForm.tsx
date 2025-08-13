@@ -10,7 +10,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { DEPARTMENT_DISPLAY_NAMES, DepartmentType, ClabsiSurveillanceInsert } from '@/types/database';
 import { 
     AlertTriangle, CheckCircle, Save, User, Syringe, TestTube2, 
-    Microscope, FileText, X, Home, ClipboardList 
+    Microscope, FileText, Home, ClipboardList 
 } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
@@ -44,7 +44,10 @@ const clabsiSchema = z.object({
   patient_name: z.string().min(3, "Patient name is required"),
   hospital_id: z.string().min(1, "Hospital ID is required"),
   ward_bed_number: z.string().min(1, "Ward/Bed number is required"),
-  department: z.nativeEnum(DepartmentType, { errorMap: () => ({ message: "Please select a department."}) }),
+  // FIX: Replaced 'errorMap' with the correct 'invalid_type_error' property for custom messages.
+  department: z.nativeEnum(DepartmentType, { 
+    invalid_type_error: "Please select a department."
+  }),
   line_insertion_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   line_type: z.string().min(1, "Line type is required"),
   insertion_site: z.string().min(1, "Insertion site is required"),
@@ -119,7 +122,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-800">CLABSI Incidence Form</h1>
         
-        {/* FIX: Replaced the old close button with two new navigation buttons */}
         <div className="flex items-center gap-2">
             <button
                 onClick={() => handleSectionChange('forms')}
