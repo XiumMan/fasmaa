@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
-// FIX: Import the ReviewStatus enum
 import { DEPARTMENT_DISPLAY_NAMES, DepartmentType, ClabsiSurveillanceInsert, ReviewStatus } from '@/types/database';
 import { 
     AlertTriangle, CheckCircle, Save, User, Syringe, TestTube2, 
@@ -39,6 +38,7 @@ const CheckboxField: React.FC<{ register: any; name: string; label: string }> = 
     </div>
 );
 
+
 // --- ZOD SCHEMA ---
 const clabsiSchema = z.object({
   patient_name: z.string().min(3, "Patient name is required"),
@@ -52,10 +52,14 @@ const clabsiSchema = z.object({
   insertion_site: z.string().min(1, "Insertion site is required"),
   surveillance_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   bloodstream_infection_date: z.string().optional(),
+  // FIX: Added all required fields to the symptoms object to match the main type.
   symptoms: z.object({
     fever: z.boolean(),
     chills: z.boolean(),
     hypotension: z.boolean(),
+    altered_mental_status: z.boolean(),
+    line_site_inflammation: z.boolean(),
+    line_site_purulence: z.boolean(),
   }),
   laboratory_findings: z.object({
     blood_culture_date: z.string().optional(),
@@ -91,7 +95,15 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
         insertion_site: '',
         surveillance_date: new Date().toISOString().split('T')[0],
         bloodstream_infection_date: '',
-        symptoms: { fever: false, chills: false, hypotension: false },
+        // FIX: Added default values for the new symptom fields.
+        symptoms: { 
+            fever: false, 
+            chills: false, 
+            hypotension: false,
+            altered_mental_status: false,
+            line_site_inflammation: false,
+            line_site_purulence: false,
+        },
         laboratory_findings: {
             blood_culture_date: '',
             organism_identified: '',
@@ -114,7 +126,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
       ...data,
       reason_for_line: '',
       submitted_by: user.id,
-      // FIX: Use the ReviewStatus enum instead of a plain string
       review_status: ReviewStatus.pending,
     };
 
@@ -179,10 +190,14 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
         </FormSection>
 
         <FormSection title="Clinical Symptoms" icon={Microscope}>
+          {/* FIX: Added the new checkboxes to the UI. */}
           <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
               <CheckboxField register={register} name="symptoms.fever" label="Fever (>38°C)" />
               <CheckboxField register={register} name="symptoms.chills" label="Chills" />
               <CheckboxField register={register} name="symptoms.hypotension" label="Hypotension" />
+              <CheckboxField register={register} name="symptoms.altered_mental_status" label="Altered Mental Status" />
+              <CheckboxField register={register} name="symptoms.line_site_inflammation" label="Line Site Inflammation" />
+              <CheckboxField register={register} name="symptoms.line_site_purulence" label="Line Site Purulence" />
           </div>
         </FormSection>
 
