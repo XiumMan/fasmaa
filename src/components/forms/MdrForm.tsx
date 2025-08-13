@@ -43,7 +43,8 @@ const SelectField: React.FC<{ register: any; name: string; label: string; error?
 const mdrSchema = z.object({
   hospital_id: z.string().min(1, "Hospital ID is required"),
   full_name: z.string().min(3, "Full name is required"),
-  age: z.coerce.number().min(0, "Age cannot be negative"),
+  // FIX: Add a .default(0) to handle empty inputs safely
+  age: z.coerce.number().default(0).refine(n => n >= 0, "Age cannot be negative"),
   sex: z.enum(['Male', 'Female']),
   ward_unit: z.string().min(1, "Ward/Unit is required"),
   consultant_in_charge: z.string().min(1, "Consultant is required"),
@@ -61,7 +62,6 @@ const mdrSchema = z.object({
   outcome_date: z.string().min(1, "Outcome date is required"),
   reported_by: z.string().min(1, "Your name is required"),
   report_submission_date: z.string(),
-  // Optional fields
   empiric_antibiotics: z.string().optional(),
   empiric_antibiotics_start_date: z.string().optional(),
   culture_specific_antibiotics: z.string().optional(),
@@ -100,7 +100,7 @@ export default function MdrForm({ handleSectionChange }: MdrFormProps) {
       const payload = {
         ...data,
         created_by: user?.id,
-        risk_factors: {}, // risk_factors can be added here if needed in DB
+        risk_factors: {}, 
       };
       
       const { error: insertError } = await supabase.from('mdr_surveillance').insert([payload]);
