@@ -1,7 +1,7 @@
 // src/components/forms/ClabsiForm.tsx
 'use client'
 
-import React, { useState } from 'react';
+import React, auseState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -52,7 +52,6 @@ const clabsiSchema = z.object({
   insertion_site: z.string().min(1, "Insertion site is required"),
   surveillance_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   bloodstream_infection_date: z.string().optional(),
-  // FIX: Added all required fields to the symptoms object to match the main type.
   symptoms: z.object({
     fever: z.boolean(),
     chills: z.boolean(),
@@ -61,10 +60,12 @@ const clabsiSchema = z.object({
     line_site_inflammation: z.boolean(),
     line_site_purulence: z.boolean(),
   }),
+  // FIX: Added the required 'line_tip_culture' field to the schema.
   laboratory_findings: z.object({
     blood_culture_date: z.string().optional(),
     organism_identified: z.string().optional(),
     culture_source: z.string().optional(),
+    line_tip_culture: z.boolean(),
   }),
   meets_clabsi_criteria: z.boolean(),
   notes: z.string().optional(),
@@ -95,7 +96,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
         insertion_site: '',
         surveillance_date: new Date().toISOString().split('T')[0],
         bloodstream_infection_date: '',
-        // FIX: Added default values for the new symptom fields.
         symptoms: { 
             fever: false, 
             chills: false, 
@@ -104,10 +104,12 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
             line_site_inflammation: false,
             line_site_purulence: false,
         },
+        // FIX: Added the default value for 'line_tip_culture'.
         laboratory_findings: {
             blood_culture_date: '',
             organism_identified: '',
-            culture_source: ''
+            culture_source: '',
+            line_tip_culture: false,
         },
         meets_clabsi_criteria: false,
         notes: ''
@@ -190,7 +192,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
         </FormSection>
 
         <FormSection title="Clinical Symptoms" icon={Microscope}>
-          {/* FIX: Added the new checkboxes to the UI. */}
           <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
               <CheckboxField register={register} name="symptoms.fever" label="Fever (>38°C)" />
               <CheckboxField register={register} name="symptoms.chills" label="Chills" />
@@ -206,6 +207,10 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
           <InputField register={register} name="laboratory_findings.organism_identified" label="Organism Identified" />
           <InputField register={register} name="laboratory_findings.culture_source" label="Culture Source (e.g., Peripheral, Line)" />
           <InputField register={register} name="bloodstream_infection_date" label="Bloodstream Infection (BSI) Date" type="date" />
+          {/* FIX: Added the new checkbox to the UI */}
+          <div className="md:col-span-2">
+            <CheckboxField register={register} name="laboratory_findings.line_tip_culture" label="Line Tip Culture Sent" />
+          </div>
         </FormSection>
 
         <FormSection title="Final Assessment" icon={FileText}>
