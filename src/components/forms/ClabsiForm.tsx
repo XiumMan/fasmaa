@@ -1,7 +1,7 @@
 // src/components/forms/ClabsiForm.tsx
 'use client'
 
-import React, auseState } from 'react';
+import React, { useState } from 'react'; // FIX: Corrected the typo 'auseState' to 'useState'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -60,7 +60,6 @@ const clabsiSchema = z.object({
     line_site_inflammation: z.boolean(),
     line_site_purulence: z.boolean(),
   }),
-  // FIX: Added the required 'line_tip_culture' field to the schema.
   laboratory_findings: z.object({
     blood_culture_date: z.string().optional(),
     organism_identified: z.string().optional(),
@@ -104,7 +103,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
             line_site_inflammation: false,
             line_site_purulence: false,
         },
-        // FIX: Added the default value for 'line_tip_culture'.
         laboratory_findings: {
             blood_culture_date: '',
             organism_identified: '',
@@ -207,7 +205,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
           <InputField register={register} name="laboratory_findings.organism_identified" label="Organism Identified" />
           <InputField register={register} name="laboratory_findings.culture_source" label="Culture Source (e.g., Peripheral, Line)" />
           <InputField register={register} name="bloodstream_infection_date" label="Bloodstream Infection (BSI) Date" type="date" />
-          {/* FIX: Added the new checkbox to the UI */}
           <div className="md:col-span-2">
             <CheckboxField register={register} name="laboratory_findings.line_tip_culture" label="Line Tip Culture Sent" />
           </div>
