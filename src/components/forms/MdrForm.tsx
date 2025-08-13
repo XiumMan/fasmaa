@@ -2,7 +2,8 @@
 'use client'
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+// FIX: Import specific types from react-hook-form
+import { useForm, SubmitHandler, UseFormRegister } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase';
@@ -10,34 +11,6 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { 
     Save, AlertCircle, CheckCircle, User, Stethoscope, Microscope, Beaker, ShieldCheck, HeartPulse, FileSignature, Home, ClipboardList 
 } from 'lucide-react';
-
-// --- HELPER COMPONENTS (for consistent UI) ---
-const FormSection: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center"><Icon className="w-5 h-5 mr-3 text-blue-600" />{title}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-        {children}
-      </div>
-    </div>
-);
-
-const InputField: React.FC<{ register: any; name: string; label: string; type?: string; error?: string; className?: string }> = ({ register, name, label, type = 'text', error, className }) => (
-    <div className={className}>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <input id={name} type={type} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`} />
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-    </div>
-);
-
-const SelectField: React.FC<{ register: any; name: string; label: string; error?: string; children: React.ReactNode; className?: string }> = ({ register, name, label, error, children, className }) => (
-    <div className={className}>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <select id={name} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`}>
-            {children}
-        </select>
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-    </div>
-);
 
 // --- FORM SCHEMA (Zod for validation) ---
 const mdrSchema = z.object({
@@ -75,6 +48,36 @@ const mdrSchema = z.object({
 
 type MdrFormData = z.infer<typeof mdrSchema>;
 
+// --- HELPER COMPONENTS (for consistent UI) ---
+const FormSection: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
+    <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center"><Icon className="w-5 h-5 mr-3 text-blue-600" />{title}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+        {children}
+      </div>
+    </div>
+);
+
+// FIX: Use UseFormRegister<MdrFormData> instead of 'any' for type safety.
+const InputField: React.FC<{ register: UseFormRegister<MdrFormData>; name: keyof MdrFormData; label: string; type?: string; error?: string; className?: string }> = ({ register, name, label, type = 'text', error, className }) => (
+    <div className={className}>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <input id={name} type={type} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`} />
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+);
+
+// FIX: Use UseFormRegister<MdrFormData> instead of 'any' for type safety.
+const SelectField: React.FC<{ register: UseFormRegister<MdrFormData>; name: keyof MdrFormData; label: string; error?: string; children: React.ReactNode; className?: string }> = ({ register, name, label, error, children, className }) => (
+    <div className={className}>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <select id={name} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`}>
+            {children}
+        </select>
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+);
+
 interface MdrFormProps {
   handleSectionChange: (section: string) => void;
 }
@@ -93,7 +96,7 @@ export default function MdrForm({ handleSectionChange }: MdrFormProps) {
     }
   });
 
-  const onSubmit = async (data: MdrFormData) => {
+  const onSubmit: SubmitHandler<MdrFormData> = async (data) => {
     setLoading(true);
     setFormStatus(null);
     try {
@@ -112,9 +115,10 @@ export default function MdrForm({ handleSectionChange }: MdrFormProps) {
         designation: profile?.role || '',
         report_submission_date: new Date().toISOString().split('T')[0],
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error submitting MDR form:", err);
-      setFormStatus({ type: 'error', message: err.message || 'An unexpected error occurred.' });
+      const error = err as Error;
+      setFormStatus({ type: 'error', message: error.message || 'An unexpected error occurred.' });
     } finally {
       setLoading(false);
     }
