@@ -43,7 +43,7 @@ const SelectField: React.FC<{ register: any; name: string; label: string; error?
 const mdrSchema = z.object({
   hospital_id: z.string().min(1, "Hospital ID is required"),
   full_name: z.string().min(3, "Full name is required"),
-  // FIX: Add a .default(0) to handle empty inputs safely
+  // FIX: Add a .default(0) to handle empty inputs safely, ensuring the type is always a number.
   age: z.coerce.number().default(0).refine(n => n >= 0, "Age cannot be negative"),
   sex: z.enum(['Male', 'Female']),
   ward_unit: z.string().min(1, "Ward/Unit is required"),
@@ -188,7 +188,7 @@ export default function MdrForm({ handleSectionChange }: MdrFormProps) {
 
             <div className="flex justify-end p-6 bg-gray-50 border-t rounded-b-lg">
                 <button type="submit" disabled={loading} className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto">
-                    <Save className="h-5 w-5 mr-2" />
+                    <Save className="w-5 h-5 mr-2" />
                     {loading ? 'Submitting...' : 'Submit Form'}
                 </button>
             </div>
