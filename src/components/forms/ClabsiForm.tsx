@@ -44,9 +44,9 @@ const clabsiSchema = z.object({
   patient_name: z.string().min(3, "Patient name is required"),
   hospital_id: z.string().min(1, "Hospital ID is required"),
   ward_bed_number: z.string().min(1, "Ward/Bed number is required"),
-  // FIX: Replaced 'errorMap' with the correct 'invalid_type_error' property for custom messages.
-  department: z.nativeEnum(DepartmentType, { 
-    invalid_type_error: "Please select a department."
+  // FIX: Using the 'message' property as specified by the error log.
+  department: z.nativeEnum(DepartmentType, {
+    message: "Please select a valid department.",
   }),
   line_insertion_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   line_type: z.string().min(1, "Line type is required"),
@@ -204,7 +204,7 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
 
         <div className="flex justify-end pt-4">
           <button type="submit" disabled={loading} className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto">
-            <Save className="h-5 w-5 mr-2" />
+            <Save className="w-5 h-5 mr-2" />
             {loading ? 'Submitting...' : 'Submit Form'}
           </button>
         </div>
