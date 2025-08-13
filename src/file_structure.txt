@@ -1,0 +1,35 @@
+.
+├── app
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── login
+│   │   └── page.tsx
+│   └── page.tsx
+├── components
+│   ├── admin
+│   │   └── UserManagement.tsx
+│   ├── auth
+│   │   ├── AuthProvider.tsx
+│   │   └── LoginForm.tsx
+│   ├── dashboard
+│   │   └── MainDashboard.tsx
+│   ├── forms
+│   │   ├── CautiForm.tsx
+│   │   ├── ClabsiForm.tsx
+│   │   ├── FormsPage.tsx
+│   │   └── MdrForm.tsx
+│   ├── layout
+│   │   └── DashboardLayout.tsx
+│   └── profile
+│       └── ProfileSection.tsx
+├── file_structure.txt
+├── hooks
+│   └── useDashboard.ts
+├── lib
+│   └── supabase.ts
+└── types
+    ├── clabsi.ts
+    └── database.ts
+
+13 directories, 20 files
