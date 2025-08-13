@@ -4,7 +4,8 @@
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { CautiSurveillanceInsert, CautiSymptoms, CautiLaboratoryFindings } from '@/types/database'
+// FIX: Import the DepartmentType enum
+import { CautiSurveillanceInsert, CautiSymptoms, CautiLaboratoryFindings, DepartmentType } from '@/types/database'
 import { Save, AlertCircle, CheckCircle, Check } from 'lucide-react'
 
 const CustomCheckbox = ({ id, name, checked, onChange, label }: { id: string, name: string, checked: boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, label: string }) => (
@@ -18,8 +19,16 @@ const CustomCheckbox = ({ id, name, checked, onChange, label }: { id: string, na
 );
 
 const initialState: CautiSurveillanceInsert = {
-  surveillance_date: new Date().toISOString().split('T')[0], patient_name: '', hospital_id: '', ward_bed_number: '', department: 'ICU',
-  age: 0, gender: null, catheter_insertion_date: '', reason_for_catheter: '',
+  surveillance_date: new Date().toISOString().split('T')[0], 
+  patient_name: '', 
+  hospital_id: '', 
+  ward_bed_number: '', 
+  // FIX: Use the DepartmentType enum for the default value
+  department: DepartmentType.ICU,
+  age: 0, 
+  gender: null, 
+  catheter_insertion_date: '', 
+  reason_for_catheter: '',
   symptoms: { fever: false, rigors: false, hypotension: false, confusion_with_leukocytosis: false, costovertebral_pain: false, suprapubic_tenderness: false, testes_epididymis_prostate_pain: false, purulent_discharge: false },
   laboratory_findings: { clean_catch_voided: false, straight_catheter_specimen: false, iuc_specimen: false },
   notes: '',
@@ -72,7 +81,7 @@ export default function CautiForm() {
     try {
       const payload: CautiSurveillanceInsert = {
         ...formData,
-        submitted_by: profile.id, 
+        submitted_by: user.id, // Use user.id for foreign key to auth.users
         department: profile.department,
       };
 
@@ -96,12 +105,10 @@ export default function CautiForm() {
         </div>
         <form onSubmit={handleSubmit}>
             <div className="p-6">
-                {/* Constrain the width of the form content */}
                 <div className="max-w-5xl mx-auto space-y-8">
                     {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center"><AlertCircle className="w-5 h-5 text-red-600 mr-3" /><span className="text-red-800">{error}</span></div>}
                     {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center"><CheckCircle className="w-5 h-5 text-green-600 mr-3" /><span className="text-green-800">{success}</span></div>}
                     
-                    {/* Section for Patient Info */}
                     <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -114,7 +121,6 @@ export default function CautiForm() {
                         </div>
                     </div>
 
-                    {/* Section for Catheter Info */}
                     <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">Catheter Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -123,7 +129,6 @@ export default function CautiForm() {
                         </div>
                     </div>
 
-                    {/* Section for Symptoms & Lab Findings */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">Signs and Symptoms</h3>
@@ -139,7 +144,6 @@ export default function CautiForm() {
                         </div>
                     </div>
                     
-                    {/* Section for Notes */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                         <textarea name="notes" value={formData.notes || ''} onChange={handleChange} rows={4} className="w-full border-gray-300 rounded-md shadow-sm p-2" placeholder="Enter any additional notes, culture results, etc..."></textarea>
