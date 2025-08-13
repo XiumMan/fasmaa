@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { DEPARTMENT_DISPLAY_NAMES, DepartmentType, ClabsiSurveillanceInsert } from '@/types/database';
+// FIX: Import the ReviewStatus enum
+import { DEPARTMENT_DISPLAY_NAMES, DepartmentType, ClabsiSurveillanceInsert, ReviewStatus } from '@/types/database';
 import { 
     AlertTriangle, CheckCircle, Save, User, Syringe, TestTube2, 
     Microscope, FileText, Home, ClipboardList 
@@ -38,7 +39,6 @@ const CheckboxField: React.FC<{ register: any; name: string; label: string }> = 
     </div>
 );
 
-
 // --- ZOD SCHEMA ---
 const clabsiSchema = z.object({
   patient_name: z.string().min(3, "Patient name is required"),
@@ -52,7 +52,6 @@ const clabsiSchema = z.object({
   insertion_site: z.string().min(1, "Insertion site is required"),
   surveillance_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   bloodstream_infection_date: z.string().optional(),
-  // FIX: Removed .default() from boolean fields to let useForm handle defaults exclusively.
   symptoms: z.object({
     fever: z.boolean(),
     chills: z.boolean(),
@@ -115,7 +114,8 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
       ...data,
       reason_for_line: '',
       submitted_by: user.id,
-      review_status: 'pending',
+      // FIX: Use the ReviewStatus enum instead of a plain string
+      review_status: ReviewStatus.pending,
     };
 
     try {
