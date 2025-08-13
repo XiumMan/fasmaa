@@ -44,8 +44,7 @@ const clabsiSchema = z.object({
   patient_name: z.string().min(3, "Patient name is required"),
   hospital_id: z.string().min(1, "Hospital ID is required"),
   ward_bed_number: z.string().min(1, "Ward/Bed number is required"),
-  // FIX: Using the 'message' property as specified by the error log.
-  department: z.nativeEnum(DepartmentType, {
+  department: z.nativeEnum(DepartmentType, { 
     message: "Please select a valid department.",
   }),
   line_insertion_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
@@ -53,16 +52,18 @@ const clabsiSchema = z.object({
   insertion_site: z.string().min(1, "Insertion site is required"),
   surveillance_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   bloodstream_infection_date: z.string().optional(),
+  // FIX: Removed the outer .default() to simplify the schema.
+  // The inner .default() on the booleans is correct.
   symptoms: z.object({
     fever: z.boolean().default(false),
     chills: z.boolean().default(false),
     hypotension: z.boolean().default(false),
-  }).default({ fever: false, chills: false, hypotension: false }),
+  }),
   laboratory_findings: z.object({
     blood_culture_date: z.string().optional(),
     organism_identified: z.string().optional(),
     culture_source: z.string().optional(),
-  }).default({}),
+  }),
   meets_clabsi_criteria: z.boolean().default(false),
   notes: z.string().optional(),
 });
@@ -82,10 +83,25 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ClabsiFormData>({
     resolver: zodResolver(clabsiSchema),
+    // FIX: Make defaultValues explicit to perfectly match the schema shape.
     defaultValues: {
+        patient_name: '',
+        hospital_id: '',
+        ward_bed_number: '',
         department: undefined,
+        line_insertion_date: '',
+        line_type: '',
+        insertion_site: '',
+        surveillance_date: new Date().toISOString().split('T')[0],
+        bloodstream_infection_date: '',
         symptoms: { fever: false, chills: false, hypotension: false },
-        laboratory_findings: {},
+        laboratory_findings: {
+            blood_culture_date: '',
+            organism_identified: '',
+            culture_source: ''
+        },
+        meets_clabsi_criteria: false,
+        notes: ''
     }
   });
 
@@ -108,7 +124,7 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
       const { error } = await supabase.from('clabsi_surveillance').insert([submissionData]);
       if (error) throw error;
       setFormStatus({ type: 'success', message: 'CLABSI Surveillance Form submitted successfully!' });
-      reset();
+      reset(); // Resets to the defaultValues defined above
     } catch (err: any) {
       console.error("Error submitting form:", err);
       setFormStatus({ type: 'error', message: err.message || 'An unexpected error occurred.' });
