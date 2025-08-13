@@ -52,19 +52,18 @@ const clabsiSchema = z.object({
   insertion_site: z.string().min(1, "Insertion site is required"),
   surveillance_date: z.string().refine((val) => val && !isNaN(Date.parse(val)), { message: "A valid date is required" }),
   bloodstream_infection_date: z.string().optional(),
-  // FIX: Removed the outer .default() to simplify the schema.
-  // The inner .default() on the booleans is correct.
+  // FIX: Removed .default() from boolean fields to let useForm handle defaults exclusively.
   symptoms: z.object({
-    fever: z.boolean().default(false),
-    chills: z.boolean().default(false),
-    hypotension: z.boolean().default(false),
+    fever: z.boolean(),
+    chills: z.boolean(),
+    hypotension: z.boolean(),
   }),
   laboratory_findings: z.object({
     blood_culture_date: z.string().optional(),
     organism_identified: z.string().optional(),
     culture_source: z.string().optional(),
   }),
-  meets_clabsi_criteria: z.boolean().default(false),
+  meets_clabsi_criteria: z.boolean(),
   notes: z.string().optional(),
 });
 
@@ -83,7 +82,6 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ClabsiFormData>({
     resolver: zodResolver(clabsiSchema),
-    // FIX: Make defaultValues explicit to perfectly match the schema shape.
     defaultValues: {
         patient_name: '',
         hospital_id: '',
@@ -124,7 +122,7 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
       const { error } = await supabase.from('clabsi_surveillance').insert([submissionData]);
       if (error) throw error;
       setFormStatus({ type: 'success', message: 'CLABSI Surveillance Form submitted successfully!' });
-      reset(); // Resets to the defaultValues defined above
+      reset(); 
     } catch (err: any) {
       console.error("Error submitting form:", err);
       setFormStatus({ type: 'error', message: err.message || 'An unexpected error occurred.' });
