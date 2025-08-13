@@ -54,8 +54,9 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
     full_name: '',
     employee_id: '',
     phone: '',
-    department: 'ICU',
-    role: 'STAFF_NURSE',
+    // FIX 1: Use enums for default values
+    department: DepartmentType.ICU,
+    role: UserRole.STAFF_NURSE,
     is_active: true
   })
 
@@ -77,7 +78,8 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
       setUsers(data || [])
     } catch (err) {
       console.error('Error fetching users:', err)
-      setError('Failed to load users')
+      const error = err as Error
+      setError(error.message || 'Failed to load users')
     } finally {
       setLoading(false)
     }
@@ -145,8 +147,9 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
         full_name: '',
         employee_id: '',
         phone: '',
-        department: 'ICU',
-        role: 'STAFF_NURSE',
+        // FIX 2: Use enums when resetting the form
+        department: DepartmentType.ICU,
+        role: UserRole.STAFF_NURSE,
         is_active: true
       })
       setShowCreateModal(false)
@@ -234,8 +237,9 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
         full_name: '',
         employee_id: '',
         phone: '',
-        department: 'ICU',
-        role: 'STAFF_NURSE',
+        // FIX 3: Use enums when resetting the form
+        department: DepartmentType.ICU,
+        role: UserRole.STAFF_NURSE,
         is_active: true
       })
 
@@ -927,8 +931,9 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
                       full_name: '',
                       employee_id: '',
                       phone: '',
-                      department: 'ICU',
-                      role: 'STAFF_NURSE',
+                      // FIX 4: Use enums when resetting the form
+                      department: DepartmentType.ICU,
+                      role: UserRole.STAFF_NURSE,
                       is_active: true
                     })
                     setError(null)
