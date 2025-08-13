@@ -103,7 +103,8 @@ export default function PathogenChart({ tableName, dateCol, title }: PathogenCha
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  // FIX: Provide a fallback of 0 for the percent value
+                  label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                   outerRadius={150}
                   fill="#8884d8"
                   dataKey="cases"
