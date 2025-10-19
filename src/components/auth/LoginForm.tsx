@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { UserProfile } from '@/types/database'
+import DemoLogin from './DemoLogin'
 
 interface LoginFormProps {
   onSuccess?: (user: UserProfile) => void
@@ -26,6 +27,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  const handleDemoLogin = (user: any, profile: UserProfile) => {
+    if (onSuccess) {
+      onSuccess(profile)
+    } else {
+      router.push('/')
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -238,6 +247,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               )}
             </button>
           </form>
+
+          {/* Demo Login Section */}
+          <DemoLogin onDemoLogin={handleDemoLogin} />
 
           {/* Footer Info */}
           <div className="mt-6 pt-4 border-t border-gray-200">

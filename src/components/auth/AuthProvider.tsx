@@ -134,6 +134,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true)
       setError(null)
+
+      // Check for demo session first
+      const demoSession = localStorage.getItem('demo_session')
+      if (demoSession) {
+        try {
+          const { user: demoUser, profile: demoProfile } = JSON.parse(demoSession)
+          setUser(demoUser)
+          setProfile(demoProfile)
+          setLoading(false)
+          setInitialized(true)
+          return
+        } catch (demoError) {
+          console.log('Invalid demo session, clearing...')
+          localStorage.removeItem('demo_session')
+        }
+      }
+
+      // Normal Supabase auth flow
       const { data: { session: currentSession } } = await supabase.auth.getSession()
       if (currentSession?.user) {
         const userProfile = await fetchUserProfile(currentSession.user.id)
@@ -176,6 +194,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null)
       setProfile(null)
       setError(null)
+
+      // Clear demo session if it exists
+      localStorage.removeItem('demo_session')
+
+      // Sign out of Supabase
       await supabase.auth.signOut()
       router.push('/login')
     } catch (err) {

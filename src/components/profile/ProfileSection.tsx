@@ -19,7 +19,7 @@ import {
   Camera
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/components/auth/AuthProvider'
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider'
 import { DEPARTMENT_DISPLAY_NAMES, ROLE_DISPLAY_NAMES } from '@/types/database'
 
 interface ProfileFormData {
@@ -36,7 +36,7 @@ interface PasswordFormData {
 }
 
 export default function ProfileSection() {
-  const { user, profile, refreshProfile, userName, roleDisplayName, departmentDisplayName } = useAuth()
+  const { user, profile, refreshProfile, userName, roleDisplayName, departmentDisplayName  } = useSimpleAuth()
   
   // State management
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')

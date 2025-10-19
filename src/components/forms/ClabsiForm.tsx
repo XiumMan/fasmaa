@@ -6,30 +6,36 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider';
 import { DEPARTMENT_DISPLAY_NAMES, DepartmentType, ClabsiSurveillanceInsert, ReviewStatus } from '@/types/database';
-import { 
-    AlertTriangle, CheckCircle, Save, User, Syringe, TestTube2, 
-    Microscope, FileText, Home, ClipboardList 
+import {
+    AlertTriangle, CheckCircle, Save, User, Syringe, TestTube2,
+    Microscope, FileText, Home, ClipboardList
 } from 'lucide-react';
+import { Card, SectionHeader, Button, Input } from '@/components/ui/DesignSystem';
 
 // --- HELPER COMPONENTS ---
 const FormSection: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
+    <Card variant="outlined" padding="lg">
       <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center"><Icon className="w-5 h-5 mr-3 text-blue-600" />{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
         {children}
       </div>
-    </div>
+    </Card>
 );
 
-const InputField: React.FC<{ register: any; name: string; label: string; type?: string; error?: string }> = ({ register, name, label, type = 'text', error }) => (
-    <div>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <input id={name} type={type} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`} />
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-    </div>
-);
+const InputField: React.FC<{ register: any; name: string; label: string; type?: string; error?: string }> = ({ register, name, label, type = 'text', error }) => {
+  const { onChange, ...rest } = register(name);
+  return (
+    <Input
+      label={label}
+      type={type}
+      error={error}
+      onChange={onChange}
+      {...rest}
+    />
+  );
+};
 
 const CheckboxField: React.FC<{ register: any; name: string; label: string }> = ({ register, name, label }) => (
     <div className="flex items-center space-x-2 pt-2">
@@ -79,7 +85,7 @@ interface ClabsiFormProps {
 
 // --- MAIN FORM COMPONENT ---
 export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
-  const { user } = useAuth();
+  const { user  } = useSimpleAuth();
   const [loading, setLoading] = useState(false);
   const [formStatus, setFormStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -144,26 +150,27 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">CLABSI Incidence Form</h1>
-        
-        <div className="flex items-center gap-2">
-            <button
-                onClick={() => handleSectionChange('forms')}
-                className="flex items-center px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm font-medium transition-colors"
-            >
-                <ClipboardList className="h-4 w-4 mr-2" />
-                View All Forms
-            </button>
-            <button
-                onClick={() => handleSectionChange('dashboard')}
-                className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium transition-colors"
-            >
-                <Home className="h-4 w-4 mr-2" />
-                Return to Dashboard
-            </button>
-        </div>
-      </div>
+      <SectionHeader
+        title="CLABSI Incidence Form"
+        subtitle="Central Line-Associated Bloodstream Infection Surveillance"
+      >
+        <Button
+          variant="secondary"
+          onClick={() => handleSectionChange('forms')}
+          size="sm"
+        >
+          <ClipboardList className="h-4 w-4 mr-2" />
+          View All Forms
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => handleSectionChange('dashboard')}
+          size="sm"
+        >
+          <Home className="h-4 w-4 mr-2" />
+          Return to Dashboard
+        </Button>
+      </SectionHeader>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <FormSection title="Patient Demographics" icon={User}>
@@ -171,14 +178,18 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
             <InputField register={register} name="hospital_id" label="Hospital ID" error={errors.hospital_id?.message} />
             <InputField register={register} name="ward_bed_number" label="Ward / Bed Number" error={errors.ward_bed_number?.message} />
              <div>
-                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                <select id="department" {...register("department")} className={`w-full border rounded-md px-3 py-2 ${errors.department ? 'border-red-500' : 'border-gray-300'}`}>
+                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">Department {errors.department && <span className="text-red-500 ml-1">*</span>}</label>
+                <select id="department" {...register("department")} className={`block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                  errors.department
+                    ? 'border-red-300 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-[#10ac84]'
+                }`}>
                     <option value="">Select Department...</option>
                     {Object.values(DepartmentType).map((value) => (
                         <option key={value} value={value}>{DEPARTMENT_DISPLAY_NAMES[value]}</option>
                     ))}
                 </select>
-                 {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department.message}</p>}
+                 {errors.department && <p className="text-red-500 text-sm mt-1">{errors.department.message}</p>}
             </div>
         </FormSection>
 
@@ -215,29 +226,46 @@ export default function ClabsiForm({ handleSectionChange }: ClabsiFormProps) {
             <CheckboxField register={register} name="meets_clabsi_criteria" label="Patient meets criteria for CLABSI diagnosis" />
           </div>
           <div className="md:col-span-2">
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
-            <textarea id="notes" {...register("notes")} rows={4} className="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+            <textarea
+              id="notes"
+              {...register("notes")}
+              rows={4}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#10ac84] focus:border-transparent transition-colors"
+              placeholder="Enter any additional notes or observations..."
+            ></textarea>
           </div>
         </FormSection>
 
         {formStatus && (
-          <div className={`p-4 rounded-md text-sm ${formStatus.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+          <Card variant="outlined" padding="md" className={formStatus.type === 'success' ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}>
             <div className="flex">
               <div className="flex-shrink-0">
-                {formStatus.type === 'success' ? <CheckCircle className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+                {formStatus.type === 'success' ?
+                  <CheckCircle className="h-5 w-5 text-green-600" /> :
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                }
               </div>
               <div className="ml-3">
-                <p>{formStatus.message}</p>
+                <p className={`text-sm ${formStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                  {formStatus.message}
+                </p>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         <div className="flex justify-end pt-4">
-          <button type="submit" disabled={loading} className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto">
+          <Button
+            type="submit"
+            disabled={loading}
+            loading={loading}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
             <Save className="w-5 h-5 mr-2" />
             {loading ? 'Submitting...' : 'Submit Form'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

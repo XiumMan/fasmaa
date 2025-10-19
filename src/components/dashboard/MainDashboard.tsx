@@ -3,15 +3,16 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Heart, AlertCircle, Users, Plus, Activity, ChevronDown, LogOut, User, Home, 
-  ClipboardList, BarChart3, LucideIcon, FilePlus, Stethoscope
+  Heart, AlertCircle, Users, Plus, Activity, ChevronDown, LogOut, User, Home,
+  ClipboardList, BarChart3, LucideIcon, FilePlus, Stethoscope, ChevronLeft, ChevronRight, Menu
 } from "lucide-react";
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import CountUp from 'react-countup';
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useSimpleAuth } from "@/components/auth/SimpleAuthProvider";
 import { useDashboardStats, useRecentSubmissions, useMonthlyTrends, formatRelativeTime, getStatusBadgeColor } from "@/hooks/useDashboard";
+import { Card, SectionHeader, Button, StatsCard, Badge } from "@/components/ui/DesignSystem";
 
 // Import all components rendered by the dashboard
 import UserManagement from "@/components/admin/UserManagement";
@@ -48,12 +49,13 @@ export default function MainDashboard() {
   // --- STATE MANAGEMENT ---
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [trendRange, setTrendRange] = useState(6); 
 
   // --- DATA HOOKS ---
-  const { profile, userName, roleDisplayName, departmentDisplayName, canAccessForm, isAdmin, isIpcFocal, signOut } = useAuth();
+  const { profile, userName, roleDisplayName, departmentDisplayName, canAccessForm, isAdmin, isIpcFocal, signOut } = useSimpleAuth();
   const { stats, loading: statsLoading } = useDashboardStats();
   const { submissions, loading: submissionsLoading } = useRecentSubmissions(8);
   const { trends, loading: trendsLoading } = useMonthlyTrends(trendRange);
@@ -151,19 +153,123 @@ export default function MainDashboard() {
       {/* --- Mobile Sidebar --- */}
       {sidebarOpen && (<div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50"><div className="fixed left-0 top-0 bottom-0 w-80 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}><div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white"><div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">FASMAA</h2><button onClick={() => setSidebarOpen(false)} className="p-1 rounded-md hover:bg-blue-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button></div><div className="flex items-center space-x-3"><div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center"><User className="w-6 h-6 text-white" /></div><div><p className="font-medium">{userName}</p><p className="text-sm text-blue-100">{roleDisplayName}</p><p className="text-xs text-blue-200">{departmentDisplayName}</p></div></div></div><nav className="p-4 flex-1">{navigationItems.map((item) => (<button key={item.id} onClick={() => handleSectionChange(item.id)} className={`w-full flex items-center px-4 py-3 rounded-md text-left transition-colors mb-2 ${activeSection === item.id ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}><item.icon className="w-5 h-5 mr-3" /><span>{item.name}</span></button>))}</nav><div className="pt-4 px-4"><div className="border-t pt-4"><button onClick={() => handleSectionChange('profile')} className={`w-full flex items-center px-4 py-3 rounded-md text-left transition-colors mb-2 ${activeSection === 'profile' ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}><User className="w-5 h-5 mr-3" />My Profile</button><button onClick={signOut} className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-md"><LogOut className="w-5 h-5 mr-3" />Sign Out</button></div></div></div></div>)}
       {/* --- Desktop Sidebar --- */}
-      <div className="hidden lg:flex lg:flex-col lg:w-80 lg:fixed lg:inset-y-0 lg:z-30">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white"><h2 className="text-2xl font-bold mb-1">FASMAA</h2><p className="text-blue-100 text-sm">Infection Prevention & Control</p><div className="mt-6 flex items-center space-x-3"><div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center"><User className="w-6 h-6 text-white" /></div><div><p className="font-medium">{userName}</p><p className="text-sm text-blue-100">{roleDisplayName}</p><p className="text-xs text-blue-200">{departmentDisplayName}</p></div></div></div>
-        <nav className="flex-1 p-6 bg-white border-r overflow-y-auto flex flex-col">
-          <div>{navigationItems.map((item) => (<button key={item.id} onClick={() => handleSectionChange(item.id)} className={`w-full flex items-center px-4 py-3 rounded-md text-left transition-colors mb-2 ${activeSection === item.id ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}><item.icon className="w-5 h-5 mr-3" /><span className="font-medium">{item.name}</span></button>))}</div>
-          <div className="mt-auto">
-            <h3 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</h3>
-            <button onClick={() => handleSectionChange('profile')} className={`w-full flex items-center px-4 py-3 rounded-md text-left transition-colors mb-2 ${activeSection === 'profile' ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}><User className="w-5 h-5 mr-3" />My Profile</button>
-            <button onClick={signOut} className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-md"><LogOut className="w-5 h-5 mr-3" />Sign Out</button>
+      <div className={`hidden lg:flex lg:flex-col ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-80'} lg:fixed lg:inset-y-0 lg:z-30 transition-all duration-300`}>
+        {/* Sidebar Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white relative">
+          {/* Collapse Toggle Button */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="absolute top-4 right-4 p-2 rounded-md hover:bg-blue-500 transition-colors"
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="w-5 h-5 text-white" />
+            ) : (
+              <ChevronLeft className="w-5 h-5 text-white" />
+            )}
+          </button>
+
+          {/* Logo and Title */}
+          <div className={`${sidebarCollapsed ? 'text-center' : ''}`}>
+            <h2 className={`font-bold ${sidebarCollapsed ? 'text-lg' : 'text-2xl'} mb-1`}>
+              {sidebarCollapsed ? 'F' : 'FASMAA'}
+            </h2>
+            {!sidebarCollapsed && (
+              <p className="text-blue-100 text-sm">Infection Prevention & Control</p>
+            )}
+          </div>
+
+          {/* User Info */}
+          <div className={`mt-6 ${sidebarCollapsed ? 'flex justify-center' : 'flex items-center space-x-3'}`}>
+            <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            {!sidebarCollapsed && (
+              <div>
+                <p className="font-medium">{userName}</p>
+                <p className="text-sm text-blue-100">{roleDisplayName}</p>
+                <p className="text-xs text-blue-200">{departmentDisplayName}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-3 bg-white border-r overflow-y-auto flex flex-col">
+          <div className="space-y-1">
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleSectionChange(item.id)}
+                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'px-4'} py-3 rounded-lg text-left transition-all mb-1 group relative ${
+                  activeSection === item.id
+                    ? "bg-[#10ac84] text-white shadow-md"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+                title={sidebarCollapsed ? item.name : undefined}
+              >
+                <item.icon className={`w-5 h-5 ${!sidebarCollapsed ? 'mr-3' : ''} ${
+                  activeSection === item.id ? 'text-white' : 'text-gray-500'
+                }`} />
+                {!sidebarCollapsed && (
+                  <span className="font-medium">{item.name}</span>
+                )}
+
+                {/* Tooltip for collapsed state */}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                    {item.name}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Account Section */}
+          <div className="mt-auto space-y-1">
+            {!sidebarCollapsed && (
+              <h3 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Account
+              </h3>
+            )}
+
+            <button
+              onClick={() => handleSectionChange('profile')}
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'px-4'} py-3 rounded-lg text-left transition-all mb-1 group relative ${
+                activeSection === 'profile'
+                  ? "bg-[#10ac84] text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              title={sidebarCollapsed ? 'My Profile' : undefined}
+            >
+              <User className={`w-5 h-5 ${!sidebarCollapsed ? 'mr-3' : ''}`} />
+              {!sidebarCollapsed && <span className="font-medium">My Profile</span>}
+
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  My Profile
+                </div>
+              )}
+            </button>
+
+            <button
+              onClick={signOut}
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'px-4'} py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all group relative`}
+              title={sidebarCollapsed ? 'Sign Out' : undefined}
+            >
+              <LogOut className={`w-5 h-5 ${!sidebarCollapsed ? 'mr-3' : ''}`} />
+              {!sidebarCollapsed && <span className="font-medium">Sign Out</span>}
+
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  Sign Out
+                </div>
+              )}
+            </button>
           </div>
         </nav>
       </div>
       {/* --- Main Content Area --- */}
-      <div className="flex-1 lg:ml-80 flex flex-col min-h-screen">
+      <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-80'} flex flex-col min-h-screen transition-all duration-300`}>
         <header className="hidden lg:block bg-white shadow-sm border-b border-gray-200 px-6 py-4 sticky top-0 z-20">
             <div className="flex justify-between items-center">
                 <div className="text-left">
@@ -196,25 +302,159 @@ function DashboardContent({ stats, statsLoading, submissions, submissionsLoading
   const trendRanges = [ { label: '3M', value: 3 }, { label: '6M', value: 6 }, { label: '1Y', value: 12 }];
   return (
     <div className="space-y-6">
-      {(isIpcFocal || isAdmin) && (<div className="border border-yellow-200 rounded-lg p-4 bg-yellow-50"><div className="flex items-start"><AlertCircle className="w-5 h-5 mt-0.5 mr-3 text-yellow-600"/><div><h4 className="text-sm font-medium text-yellow-800">IPC Alert</h4><p className="text-sm mt-1 text-yellow-700">{stats.thisMonth > 5 ? `${stats.thisMonth} new cases this month. Consider reviewing protocols.` : "Infection rates are within normal parameters."}</p></div></div></div>)}
+      {(isIpcFocal || isAdmin) && (
+        <Card variant="outlined" className="border-yellow-200 bg-yellow-50">
+          <div className="flex items-start">
+            <AlertCircle className="w-5 h-5 mt-0.5 mr-3 text-yellow-600" />
+            <div>
+              <h4 className="text-sm font-medium text-yellow-800">IPC Alert</h4>
+              <p className="text-sm mt-1 text-yellow-700">
+                {stats.thisMonth > 5
+                  ? `${stats.thisMonth} new cases this month. Consider reviewing protocols.`
+                  : "Infection rates are within normal parameters."
+                }
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
       <div className="relative">
-          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-2 px-4 py-2 text-white font-medium bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"><Plus className="w-4 h-4" /> Add New <ChevronDown className="w-4 h-4" /></button>
-          {dropdownOpen && (<div className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-xl border z-10"><div className="p-2">{availableForms.map((form) => (<button key={form.id} onClick={() => handleFormSelect(form.id)} className="w-full flex items-center gap-3 p-3 text-left rounded-lg hover:bg-gray-100 transition-colors"><div className={`${form.bgColor} p-2 rounded-full`}><form.icon className={`w-5 h-5 ${form.iconColor}`} /></div><div><p className="font-semibold text-gray-800">{form.name}</p><p className="text-sm text-gray-500">{form.description}</p></div></button>))}</div></div>)}
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Add New Form
+          <ChevronDown className="w-4 h-4" />
+        </Button>
+
+        {dropdownOpen && (
+          <Card variant="elevated" className="absolute left-0 mt-2 w-80 z-20">
+            <div className="p-2">
+              {availableForms.map((form) => (
+                <button
+                  key={form.id}
+                  onClick={() => handleFormSelect(form.id)}
+                  className="w-full flex items-center gap-3 p-3 text-left rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className={`${form.bgColor} p-2 rounded-full`}>
+                    <form.icon className={`w-5 h-5 ${form.iconColor}`} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">{form.name}</p>
+                    <p className="text-sm text-gray-500">{form.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md border"><h3 className="text-sm font-medium text-gray-700">CAUTI Cases</h3><p className="text-2xl font-bold text-gray-900 mt-1">{statsLoading ? "..." : <CountUp end={stats.cautiCases} duration={2.5} separator="," />}</p></div>
-        <div className="bg-white p-6 rounded-lg shadow-md border"><h3 className="text-sm font-medium text-gray-700">CLABSI Cases</h3><p className="text-2xl font-bold text-gray-900 mt-1">{statsLoading ? "..." : <CountUp end={stats.clabsiCases} duration={2.5} separator="," />}</p></div>
-        <div className="bg-white p-6 rounded-lg shadow-md border"><h3 className="text-sm font-medium text-gray-700">MDRO Cases</h3><p className="text-2xl font-bold text-gray-900 mt-1">{statsLoading ? "..." : <CountUp end={stats.mdroCases} duration={2.5} separator="," />}</p></div>
-        <div className="bg-white p-6 rounded-lg shadow-md border"><h3 className="text-sm font-medium text-gray-700">New This Month</h3><p className="text-2xl font-bold text-gray-900 mt-1">{statsLoading ? "..." : <CountUp end={stats.thisMonth} duration={2.5} separator="," />}</p></div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard
+          title="CAUTI Cases"
+          value={statsLoading ? "..." : <CountUp end={stats.cautiCases} duration={2.5} separator="," />}
+          icon={<Heart className="w-6 h-6 text-blue-600" />}
+          loading={statsLoading}
+        />
+        <StatsCard
+          title="CLABSI Cases"
+          value={statsLoading ? "..." : <CountUp end={stats.clabsiCases} duration={2.5} separator="," />}
+          icon={<AlertCircle className="w-6 h-6 text-red-600" />}
+          loading={statsLoading}
+        />
+        <StatsCard
+          title="MDRO Cases"
+          value={statsLoading ? "..." : <CountUp end={stats.mdroCases} duration={2.5} separator="," />}
+          icon={<FilePlus className="w-6 h-6 text-yellow-600" />}
+          loading={statsLoading}
+        />
+        <StatsCard
+          title="New This Month"
+          value={statsLoading ? "..." : <CountUp end={stats.thisMonth} duration={2.5} separator="," />}
+          icon={<Activity className="w-6 h-6 text-green-600" />}
+          loading={statsLoading}
+        />
       </div>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden border">
-        <div className="p-4 border-b flex justify-between items-center"><h3 className="text-lg font-medium text-gray-900">Monthly Infection Trends</h3><div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">{trendRanges.map(range => (<button key={range.value} onClick={() => setTrendRange(range.value)} className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${trendRange === range.value ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>{range.label}</button>))}</div></div>
-        <div className="p-4"><TrendsChart data={trends} loading={trendsLoading} /></div>
-      </div>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden border">
-        <div className="p-4 border-b"><h3 className="text-lg font-medium text-gray-900">Recent Submissions</h3></div>
-        <div className="max-h-96 overflow-y-auto"><div className="divide-y divide-gray-200">{submissionsLoading ? <div className="p-8 text-center"><p className="text-gray-500">Loading...</p></div> : submissions.length === 0 ? <div className="p-8 text-center text-gray-500"><p>No recent submissions.</p></div> : submissions.map((sub, i) => (<div key={i} className="p-4 hover:bg-gray-50 flex items-center justify-between"><div className="flex items-center space-x-3"><span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${sub.form_type === "CAUTI" ? "bg-blue-100 text-blue-800" : sub.form_type === "CLABSI" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}`}>{sub.form_type}</span><div><p className="text-sm font-medium text-gray-900">{sub.patient_name}</p><p className="text-sm text-gray-500">{sub.ward_bed_number}</p></div></div><div className="flex items-center space-x-3"><span className={`text-xs capitalize px-2 py-1 rounded-full ${getStatusBadgeColor(sub.review_status)}`}>{sub.review_status}</span><span className="text-sm text-gray-500">{formatRelativeTime(sub.created_at)}</span></div></div>))}</div></div>
-      </div>
+      <Card variant="outlined" padding="lg">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-gray-900">Monthly Infection Trends</h3>
+          <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
+            {trendRanges.map(range => (
+              <button
+                key={range.value}
+                onClick={() => setTrendRange(range.value)}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  trendRange === range.value
+                    ? 'bg-white text-[#10ac84] shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800'
+                }`}
+                style={{
+                  color: trendRange === range.value ? '#10ac84' : undefined
+                }}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <TrendsChart data={trends} loading={trendsLoading} />
+      </Card>
+      <Card variant="outlined" padding="lg">
+        <SectionHeader
+          title="Recent Submissions"
+          subtitle="Latest surveillance form submissions"
+        />
+        <div className="max-h-96 overflow-y-auto">
+          <div className="space-y-3">
+            {submissionsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10ac84] mx-auto mb-4"></div>
+                <p className="text-gray-500">Loading submissions...</p>
+              </div>
+            ) : submissions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <ClipboardList className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p>No recent submissions.</p>
+              </div>
+            ) : (
+              submissions.map((sub, i) => (
+                <div key={i} className="p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Badge
+                        variant={sub.form_type === "CAUTI" ? "info" : sub.form_type === "CLABSI" ? "error" : "success"}
+                        size="sm"
+                      >
+                        {sub.form_type}
+                      </Badge>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{sub.patient_name}</p>
+                        <p className="text-sm text-gray-500">{sub.ward_bed_number}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge
+                        variant={
+                          sub.review_status === 'approved' ? 'success' :
+                          sub.review_status === 'rejected' ? 'error' :
+                          sub.review_status === 'requires_revision' ? 'warning' : 'neutral'
+                        }
+                        size="sm"
+                      >
+                        {sub.review_status.replace('_', ' ')}
+                      </Badge>
+                      <span className="text-sm text-gray-500">{formatRelativeTime(sub.created_at)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

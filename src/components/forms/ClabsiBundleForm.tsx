@@ -10,7 +10,7 @@ import {
   Clock
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider';
 import { ClabsiEntry, ClabsiEntryInsert, DischargeType, ShiftType } from '@/types/clabsi';
 
 interface ClabsiFormData {
@@ -44,7 +44,7 @@ interface ModalContent {
 }
 
 export default function ClabsiBundleForm() {
-  const { user, profile, userName } = useAuth();
+  const { user, profile, userName  } = useSimpleAuth();
   
   const [formData, setFormData] = useState<ClabsiFormData>({
     patientId: '', admissionDate: '', admissionShift: '', dischargeDate: '',

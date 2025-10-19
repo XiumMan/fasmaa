@@ -18,7 +18,7 @@ import {
   UserPlus
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/components/auth/AuthProvider'
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider'
 import { 
   UserProfile, 
   UserProfileInsert, 
@@ -34,7 +34,7 @@ interface UserManagementProps {
 
 export default function UserManagement({ className = '' }: UserManagementProps) {
   // Auth context
-  const { isAdmin, profile: currentProfile, refreshProfile } = useAuth()
+  const { isAdmin, profile: currentProfile, refreshProfile  } = useSimpleAuth()
 
   // State management
   const [users, setUsers] = useState<UserProfile[]>([])

@@ -12,7 +12,7 @@ import {
   User,
   LogOut
 } from 'lucide-react';
-import { useAuth } from '../auth/AuthProvider';
+import { useSimpleAuth } from '../auth/SimpleAuthProvider';
 import UserProfile from '../auth/UserProfile';
 
 interface DashboardLayoutProps {
@@ -30,7 +30,7 @@ const navigation = [
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut  } = useSimpleAuth();
 
   const handleSignOut = async () => {
     try {

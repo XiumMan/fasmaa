@@ -7,10 +7,11 @@ import { useForm, SubmitHandler, UseFormRegister } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { 
-    Save, AlertCircle, CheckCircle, User, Stethoscope, Microscope, Beaker, ShieldCheck, HeartPulse, FileSignature, Home, ClipboardList 
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider';
+import {
+    Save, AlertCircle, CheckCircle, User, Stethoscope, Microscope, Beaker, ShieldCheck, HeartPulse, FileSignature, Home, ClipboardList
 } from 'lucide-react';
+import { Card, SectionHeader, Button, Input } from '@/components/ui/DesignSystem';
 
 // --- FORM SCHEMA (Zod for validation) ---
 const mdrSchema = z.object({
@@ -50,31 +51,42 @@ type MdrFormData = z.infer<typeof mdrSchema>;
 
 // --- HELPER COMPONENTS (for consistent UI) ---
 const FormSection: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
+    <Card variant="outlined" padding="lg">
       <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center"><Icon className="w-5 h-5 mr-3 text-blue-600" />{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
         {children}
       </div>
-    </div>
+    </Card>
 );
 
 // FIX: Use UseFormRegister<MdrFormData> instead of 'any' for type safety.
-const InputField: React.FC<{ register: UseFormRegister<MdrFormData>; name: keyof MdrFormData; label: string; type?: string; error?: string; className?: string }> = ({ register, name, label, type = 'text', error, className }) => (
+const InputField: React.FC<{ register: UseFormRegister<MdrFormData>; name: keyof MdrFormData; label: string; type?: string; error?: string; className?: string }> = ({ register, name, label, type = 'text', error, className }) => {
+  const { onChange, ...rest } = register(name);
+  return (
     <div className={className}>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <input id={name} type={type} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`} />
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      <Input
+        label={label}
+        type={type}
+        error={error}
+        onChange={onChange}
+        {...rest}
+      />
     </div>
-);
+  );
+};
 
 // FIX: Use UseFormRegister<MdrFormData> instead of 'any' for type safety.
 const SelectField: React.FC<{ register: UseFormRegister<MdrFormData>; name: keyof MdrFormData; label: string; error?: string; children: React.ReactNode; className?: string }> = ({ register, name, label, error, children, className }) => (
     <div className={className}>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <select id={name} {...register(name)} className={`w-full border rounded-md px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'}`}>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">{label} {error && <span className="text-red-500 ml-1">*</span>}</label>
+        <select id={name} {...register(name)} className={`block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+          error
+            ? 'border-red-300 focus:ring-red-500'
+            : 'border-gray-300 focus:ring-[#10ac84]'
+        }`}>
             {children}
         </select>
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
 );
 
@@ -83,7 +95,7 @@ interface MdrFormProps {
 }
 
 export default function MdrForm({ handleSectionChange }: MdrFormProps) {
-  const { user, userName, profile } = useAuth();
+  const { user, userName, profile  } = useSimpleAuth();
   const [loading, setLoading] = useState(false);
   const [formStatus, setFormStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -126,19 +138,45 @@ export default function MdrForm({ handleSectionChange }: MdrFormProps) {
 
   return (
     <div className="max-w-5xl mx-auto">
-        <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-800">MDR Resistance Case Reporting Form</h1>
-            <div className="flex items-center gap-2">
-                <button onClick={() => handleSectionChange('forms')} className="flex items-center px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm font-medium transition-colors"><ClipboardList className="h-4 w-4 mr-2" />View All Forms</button>
-                <button onClick={() => handleSectionChange('dashboard')} className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium transition-colors"><Home className="h-4 w-4 mr-2" />Return to Dashboard</button>
-            </div>
-        </div>
+        <SectionHeader
+            title="MDR Resistance Case Reporting Form"
+            subtitle="Multi-Drug Resistant Organism Surveillance"
+        >
+            <Button
+              variant="secondary"
+              onClick={() => handleSectionChange('forms')}
+              size="sm"
+            >
+              <ClipboardList className="h-4 w-4 mr-2" />
+              View All Forms
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => handleSectionChange('dashboard')}
+              size="sm"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Return to Dashboard
+            </Button>
+        </SectionHeader>
       
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {formStatus && (
-                <div className={`p-4 rounded-md text-sm ${formStatus.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                    <div className="flex"><div className="flex-shrink-0">{formStatus.type === 'success' ? <CheckCircle className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}</div><div className="ml-3"><p>{formStatus.message}</p></div></div>
-                </div>
+                <Card variant="outlined" padding="md" className={formStatus.type === 'success' ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}>
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        {formStatus.type === 'success' ?
+                          <CheckCircle className="h-5 w-5 text-green-600" /> :
+                          <AlertCircle className="h-5 w-5 text-red-600" />
+                        }
+                      </div>
+                      <div className="ml-3">
+                        <p className={`text-sm ${formStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                          {formStatus.message}
+                        </p>
+                      </div>
+                    </div>
+                </Card>
             )}
 
             <FormSection title="Patient Information" icon={User}>
@@ -190,11 +228,17 @@ export default function MdrForm({ handleSectionChange }: MdrFormProps) {
                 <InputField register={register} name="report_submission_date" label="Submission Date" type="date" error={errors.report_submission_date?.message} />
             </FormSection>
 
-            <div className="flex justify-end p-6 bg-gray-50 border-t rounded-b-lg">
-                <button type="submit" disabled={loading} className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto">
-                    <Save className="w-5 h-5 mr-2" />
-                    {loading ? 'Submitting...' : 'Submit Form'}
-                </button>
+            <div className="flex justify-end pt-4">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  loading={loading}
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  <Save className="w-5 h-5 mr-2" />
+                  {loading ? 'Submitting...' : 'Submit Form'}
+                </Button>
             </div>
       </form>
     </div>

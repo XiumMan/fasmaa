@@ -1,0 +1,26 @@
+# Vercel Ignore File
+# Files and directories to exclude from deployment
+
+# Scripts (only needed locally)
+scripts/
+
+# Documentation
+*.md
+!README.md
+
+# Local environment files
+.env.local
+.env*.local
+
+# Test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Development files
+.vscode/
+.idea/
+
+# Large media files that aren't needed for production
+public/Suggested_Content___Grand.mp4

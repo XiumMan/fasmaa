@@ -3,10 +3,11 @@
 
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/components/auth/AuthProvider'
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider'
 // FIX: Import the DepartmentType enum
 import { CautiSurveillanceInsert, CautiSymptoms, CautiLaboratoryFindings, DepartmentType } from '@/types/database'
 import { Save, AlertCircle, CheckCircle, Check } from 'lucide-react'
+import { Card, SectionHeader, Button, Input } from '@/components/ui/DesignSystem'
 
 const CustomCheckbox = ({ id, name, checked, onChange, label }: { id: string, name: string, checked: boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, label: string }) => (
   <label htmlFor={id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-100">
@@ -35,7 +36,7 @@ const initialState: CautiSurveillanceInsert = {
 }
 
 export default function CautiForm() {
-  const { user, profile } = useAuth()
+  const { user, profile  } = useSimpleAuth()
   const [formData, setFormData] = useState<CautiSurveillanceInsert>(initialState)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -99,61 +100,148 @@ export default function CautiForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200">
-        <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-800">Catheter-Associated UTI (CAUTI) Surveillance Form</h2>
-        </div>
-        <form onSubmit={handleSubmit}>
-            <div className="p-6">
-                <div className="max-w-5xl mx-auto space-y-8">
-                    {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center"><AlertCircle className="w-5 h-5 text-red-600 mr-3" /><span className="text-red-800">{error}</span></div>}
-                    {success && <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center"><CheckCircle className="w-5 h-5 text-green-600 mr-3" /><span className="text-green-800">{success}</span></div>}
+    <div className="max-w-6xl mx-auto">
+      <SectionHeader
+        title="CAUTI Surveillance Form"
+        subtitle="Catheter-Associated Urinary Tract Infection"
+      />
+        <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                      <Card variant="outlined" padding="md" className="border-red-300 bg-red-50">
+                        <div className="flex">
+                          <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+                          <span className="text-red-800 text-sm">{error}</span>
+                        </div>
+                      </Card>
+                    )}
+                    {success && (
+                      <Card variant="outlined" padding="md" className="border-green-300 bg-green-50">
+                        <div className="flex">
+                          <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                          <span className="text-green-800 text-sm">{success}</span>
+                        </div>
+                      </Card>
+                    )}
                     
-                    <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
+                    <Card variant="outlined" padding="lg">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Surveillance Date</label><input type="date" name="surveillance_date" value={formData.surveillance_date} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Patient Name</label><input type="text" name="patient_name" value={formData.patient_name} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Hospital No.</label><input type="text" name="hospital_id" value={formData.hospital_id} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Ward/Bed No.</label><input type="text" name="ward_bed_number" value={formData.ward_bed_number} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Age</label><input type="number" name="age" value={formData.age || ''} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Sex</label><select name="gender" value={formData.gender || ''} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                            <Input
+                              label="Surveillance Date"
+                              type="date"
+                              value={formData.surveillance_date}
+                              onChange={handleChange}
+                              required
+                            />
+                            <Input
+                              label="Patient Name"
+                              type="text"
+                              value={formData.patient_name}
+                              onChange={handleChange}
+                              required
+                            />
+                            <Input
+                              label="Hospital No."
+                              type="text"
+                              value={formData.hospital_id}
+                              onChange={handleChange}
+                              required
+                            />
+                            <Input
+                              label="Ward/Bed No."
+                              type="text"
+                              value={formData.ward_bed_number}
+                              onChange={handleChange}
+                              required
+                            />
+                            <Input
+                              label="Age"
+                              type="number"
+                              value={formData.age || ''}
+                              onChange={handleChange}
+                              required
+                            />
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Sex <span className="text-red-500 ml-1">*</span></label>
+                              <select
+                                name="gender"
+                                value={formData.gender || ''}
+                                onChange={handleChange}
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#10ac84] focus:border-transparent transition-colors"
+                                required
+                              >
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                              </select>
+                            </div>
                         </div>
-                    </div>
+                    </Card>
 
-                    <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
+                    <Card variant="outlined" padding="lg">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">Catheter Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Catheter Insertion Date</label><input type="date" name="catheter_insertion_date" value={formData.catheter_insertion_date} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
-                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Reason for Catheter</label><input type="text" name="reason_for_catheter" value={formData.reason_for_catheter || ''} onChange={handleChange} className="w-full bg-white border-gray-300 rounded-md shadow-sm p-2" required/></div>
+                            <Input
+                              label="Catheter Insertion Date"
+                              type="date"
+                              value={formData.catheter_insertion_date}
+                              onChange={handleChange}
+                              required
+                            />
+                            <Input
+                              label="Reason for Catheter"
+                              type="text"
+                              value={formData.reason_for_catheter || ''}
+                              onChange={handleChange}
+                              required
+                            />
                         </div>
-                    </div>
+                    </Card>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Card variant="outlined" padding="lg">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">Signs and Symptoms</h3>
                             <div className="space-y-2">
                                 {Object.keys(initialState.symptoms!).map((key) => (<CustomCheckbox key={key} id={`symptoms.${key}`} name={`symptoms.${key}`} checked={!!formData.symptoms?.[key as keyof CautiSymptoms]} onChange={handleChange} label={key.replace(/_/g, ' ')} />))}
                             </div>
-                        </div>
-                        <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
+                        </Card>
+                        <Card variant="outlined" padding="lg">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">Laboratory Findings</h3>
                             <div className="space-y-2">
                                 {Object.keys(initialState.laboratory_findings!).map((key) => (<CustomCheckbox key={key} id={`lab.${key}`} name={`laboratory_findings.${key}`} checked={!!formData.laboratory_findings?.[key as keyof CautiLaboratoryFindings]} onChange={handleChange} label={key.replace(/_/g, ' ')} />))}
                             </div>
-                        </div>
+                        </Card>
                     </div>
                     
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                        <textarea name="notes" value={formData.notes || ''} onChange={handleChange} rows={4} className="w-full border-gray-300 rounded-md shadow-sm p-2" placeholder="Enter any additional notes, culture results, etc..."></textarea>
-                    </div>
-                </div>
-            </div>
+                    <Card variant="outlined" padding="lg">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea
+                          name="notes"
+                          value={formData.notes || ''}
+                          onChange={handleChange}
+                          rows={4}
+                          className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#10ac84] focus:border-transparent transition-colors"
+                          placeholder="Enter any additional notes, culture results, etc..."
+                        ></textarea>
+                    </Card>
 
-            <div className="flex justify-end p-6 bg-gray-50 border-t mt-6">
-                <button type="button" onClick={() => setFormData(initialState)} className="mr-3 bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 font-semibold">Cancel</button>
-                <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center font-semibold"><Save className="w-4 h-4 mr-2" />{loading ? 'Submitting...' : 'Submit Form'}</button>
+            <div className="flex justify-end gap-3 pt-6">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setFormData(initialState)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={loading}
+                  loading={loading}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {loading ? 'Submitting...' : 'Submit Form'}
+                </Button>
             </div>
         </form>
     </div>

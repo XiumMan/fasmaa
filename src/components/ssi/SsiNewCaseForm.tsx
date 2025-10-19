@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useSimpleAuth } from '@/components/auth/SimpleAuthProvider';
 import { DepartmentType } from '@/types/database';
 import { Save } from 'lucide-react';
 
@@ -38,7 +38,7 @@ interface SsiNewCaseFormProps {
 }
 
 export default function SsiNewCaseForm({ onClose, onCaseAdded }: SsiNewCaseFormProps) {
-  const { user } = useAuth();
+  const { user } = useSimpleAuth();
   
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SsiCaseFormData>({
     resolver: zodResolver(ssiCaseSchema),
