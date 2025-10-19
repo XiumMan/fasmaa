@@ -204,7 +204,7 @@ export function Input({
 // Stats card component
 interface StatsCardProps {
   title: string
-  value: string | number
+  value: string | number | React.ReactNode
   icon?: React.ReactNode
   trend?: {
     value: number

@@ -36,7 +36,7 @@ interface PasswordFormData {
 }
 
 export default function ProfileSection() {
-  const { user, profile, refreshProfile, userName, roleDisplayName, departmentDisplayName  } = useSimpleAuth()
+  const { user, profile, userName, roleDisplayName, departmentDisplayName } = useSimpleAuth()
   
   // State management
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')
@@ -118,10 +118,9 @@ export default function ProfileSection() {
         }
       }
 
-      // Refresh the profile data
-      await refreshProfile()
-      
-      setSuccess('Profile updated successfully!')
+      // Note: User may need to log out and back in to see all changes reflected
+
+      setSuccess('Profile updated successfully! Please log out and back in to see all changes.')
       setIsEditing(false)
       
       // Auto-clear success message after 3 seconds

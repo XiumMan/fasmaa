@@ -157,7 +157,7 @@ export default function CautiForm() {
                             <Input
                               label="Age"
                               type="number"
-                              value={formData.age || ''}
+                              value={formData.age?.toString() || ''}
                               onChange={handleChange}
                               required
                             />

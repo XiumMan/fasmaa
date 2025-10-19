@@ -17,8 +17,7 @@ import { Card, SectionHeader, Button, Input } from '@/components/ui/DesignSystem
 const mdrSchema = z.object({
   hospital_id: z.string().min(1, "Hospital ID is required"),
   full_name: z.string().min(3, "Full name is required"),
-  // FIX: Add a .default(0) to handle empty inputs safely, ensuring the type is always a number.
-  age: z.coerce.number().default(0).refine(n => n >= 0, "Age cannot be negative"),
+  age: z.number().min(0, "Age cannot be negative"),
   sex: z.enum(['Male', 'Female']),
   ward_unit: z.string().min(1, "Ward/Unit is required"),
   consultant_in_charge: z.string().min(1, "Consultant is required"),

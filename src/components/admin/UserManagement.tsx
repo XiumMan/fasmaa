@@ -34,7 +34,7 @@ interface UserManagementProps {
 
 export default function UserManagement({ className = '' }: UserManagementProps) {
   // Auth context
-  const { isAdmin, profile: currentProfile, refreshProfile  } = useSimpleAuth()
+  const { isAdmin, profile: currentProfile } = useSimpleAuth()
 
   // State management
   const [users, setUsers] = useState<UserProfile[]>([])
@@ -225,11 +225,9 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
 
       // Refresh users list
       await fetchUsers()
-      
-      // If current user updated themselves, refresh their profile
-      if (isCurrentUser) {
-        await refreshProfile()
-      }
+
+      // If current user updated themselves, they may need to log out and back in
+      // to see changes reflected in their session
 
       setEditingUser(null)
       setFormData({

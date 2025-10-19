@@ -13,7 +13,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { useSimpleAuth } from '../auth/SimpleAuthProvider';
-import UserProfile from '../auth/UserProfile';
+import ProfileSection from '../profile/ProfileSection';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -269,10 +269,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </nav>
 
       {/* User Profile Modal */}
-      <UserProfile 
-        isOpen={profileOpen} 
-        onClose={() => setProfileOpen(false)} 
-      />
+      {profileOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Profile</h2>
+              <button onClick={() => setProfileOpen(false)} className="text-gray-500 hover:text-gray-700">
+                ✕
+              </button>
+            </div>
+            <ProfileSection />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
